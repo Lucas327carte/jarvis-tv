@@ -14,7 +14,7 @@
       --cyan-dim: rgba(0, 229, 255, 0.18);
       --cyan-mid: rgba(0, 229, 255, 0.55);
       --bg: #020b12;
-      --panel: rgba(0, 18, 30, 0.82);
+      --panel: rgba(0, 18, 30, 0.75);
     }
 
     html, body {
@@ -25,7 +25,6 @@
       overflow: hidden;
     }
 
-    /* Animated grid background */
     body::before {
       content: '';
       position: fixed; inset: 0;
@@ -38,7 +37,6 @@
       z-index: 0;
     }
 
-    /* Radial glow center */
     body::after {
       content: '';
       position: fixed; inset: 0;
@@ -71,11 +69,46 @@
       padding-bottom: 1.5vh;
     }
 
+    .logo-wrap { display: flex; align-items: center; gap: 1.5vw; }
+
+    /* Core radar orb next to logo */
+    .core {
+      position: relative;
+      width: clamp(48px, 6vw, 72px);
+      height: clamp(48px, 6vw, 72px);
+      flex-shrink: 0;
+    }
+    .core .ring {
+      position: absolute; inset: 0;
+      border: 2px solid var(--cyan);
+      border-radius: 50%;
+      opacity: 0.7;
+    }
+    .core .ring.r2 { inset: 8px; animation: ringSpin 6s linear infinite; border-style: dashed; }
+    .core .ring.r3 { inset: 16px; animation: ringSpin 4s linear infinite reverse; }
+    .core .sweep {
+      position: absolute; inset: 0;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, rgba(0,229,255,0.9), transparent 35%);
+      animation: ringSpin 2.2s linear infinite;
+      mix-blend-mode: screen;
+    }
+    .core .dot {
+      position: absolute; top: 50%; left: 50%;
+      width: 8px; height: 8px; margin: -4px;
+      background: var(--cyan);
+      border-radius: 50%;
+      box-shadow: 0 0 12px var(--cyan), 0 0 24px var(--cyan);
+      animation: dotPulse 1.6s ease-in-out infinite;
+    }
+    @keyframes ringSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes dotPulse { 0%,100% { transform: translate(-50%,-50%) scale(1); opacity:1;} 50% { transform: translate(-50%,-50%) scale(1.6); opacity:0.6;} }
+
     .logo {
       font-family: 'Orbitron', monospace;
       font-weight: 900;
-      font-size: clamp(2.4rem, 5vw, 4.2rem);
-      letter-spacing: 0.18em;
+      font-size: clamp(2.2rem, 4.6vw, 3.8rem);
+      letter-spacing: 0.16em;
       color: var(--cyan);
       text-shadow: 0 0 24px rgba(0,229,255,0.8), 0 0 60px rgba(0,229,255,0.3);
       animation: logoBlink 3s ease-in-out infinite;
@@ -86,15 +119,19 @@
       50%       { text-shadow: 0 0 40px rgba(0,229,255,1),   0 0 90px rgba(0,229,255,0.5); }
     }
 
-    .header-right {
-      text-align: right;
-    }
+    .header-right { text-align: right; }
 
     .status-line {
       font-size: clamp(0.75rem, 1.4vw, 1.1rem);
       color: rgba(0,229,255,0.7);
       letter-spacing: 0.12em;
       text-transform: uppercase;
+      display: flex; align-items: center; gap: 8px; justify-content: flex-end;
+    }
+    .status-led {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #00ff9d; box-shadow: 0 0 8px #00ff9d;
+      animation: dotPulse 1.6s ease-in-out infinite;
     }
 
     #clock {
@@ -115,25 +152,35 @@
     .panel {
       background: var(--panel);
       border: 1px solid var(--cyan-mid);
-      box-shadow: 0 0 32px var(--cyan-dim), inset 0 0 20px rgba(0,229,255,0.04);
+      border-radius: 18px;
+      box-shadow: 0 0 32px var(--cyan-dim), inset 0 0 30px rgba(0,229,255,0.05);
       padding: 3vh 2.5vw;
       display: flex;
       flex-direction: column;
       gap: 1.5vh;
       position: relative;
       overflow: hidden;
+      backdrop-filter: blur(2px);
     }
 
-    /* Corner decorations */
-    .panel::before, .panel::after {
+    /* Animated border sweep */
+    .panel::before {
       content: '';
-      position: absolute;
-      width: 16px; height: 16px;
-      border-color: var(--cyan);
-      border-style: solid;
+      position: absolute; inset: -2px;
+      border-radius: 18px;
+      background: conic-gradient(from 0deg, transparent 0%, var(--cyan) 8%, transparent 16%);
+      opacity: 0.5;
+      animation: borderSweep 5s linear infinite;
+      z-index: -1;
     }
-    .panel::before { top: 8px; left: 8px; border-width: 2px 0 0 2px; }
-    .panel::after  { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; }
+    .panel::after {
+      content: '';
+      position: absolute; inset: 1px;
+      border-radius: 17px;
+      background: var(--panel);
+      z-index: -1;
+    }
+    @keyframes borderSweep { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
     .panel-label {
       font-family: 'Orbitron', monospace;
@@ -141,8 +188,21 @@
       letter-spacing: 0.2em;
       color: var(--cyan);
       text-transform: uppercase;
-      opacity: 0.8;
+      opacity: 0.9;
+      display: flex; align-items: center; gap: 10px;
     }
+    .panel-label .bar {
+      display: inline-flex; gap: 3px;
+    }
+    .panel-label .bar span {
+      width: 3px; height: 12px;
+      background: var(--cyan);
+      opacity: 0.4;
+      animation: barWave 1.2s ease-in-out infinite;
+    }
+    .panel-label .bar span:nth-child(2) { animation-delay: 0.15s; }
+    .panel-label .bar span:nth-child(3) { animation-delay: 0.3s; }
+    @keyframes barWave { 0%,100% { opacity:0.3; height:6px; } 50% { opacity:1; height:16px; } }
 
     .panel-divider {
       height: 1px;
@@ -168,7 +228,6 @@
       text-shadow: 0 0 12px rgba(0,229,255,0.4);
     }
 
-    /* Typing cursor animation */
     .cursor {
       display: inline-block;
       width: 2px; height: 1.1em;
@@ -177,11 +236,7 @@
       vertical-align: middle;
       animation: blink 1s step-end infinite;
     }
-
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
     /* ── FOOTER ── */
     footer {
@@ -196,21 +251,16 @@
       text-transform: uppercase;
     }
 
-    /* Scan line overlay */
     .scanlines {
       position: fixed; inset: 0;
       background: repeating-linear-gradient(
-        to bottom,
-        transparent 0px,
-        transparent 3px,
-        rgba(0,0,0,0.08) 3px,
-        rgba(0,0,0,0.08) 4px
+        to bottom, transparent 0px, transparent 3px,
+        rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 4px
       );
       pointer-events: none;
       z-index: 10;
     }
 
-    /* Loading state */
     .loading { opacity: 0.4; font-style: italic; }
   </style>
 </head>
@@ -221,9 +271,17 @@
 <div class="screen">
 
   <header>
-    <div class="logo">J.A.R.V.I.S</div>
+    <div class="logo-wrap">
+      <div class="core">
+        <div class="ring r2"></div>
+        <div class="ring r3"></div>
+        <div class="sweep"></div>
+        <div class="dot"></div>
+      </div>
+      <div class="logo">J.A.R.V.I.S</div>
+    </div>
     <div class="header-right">
-      <div class="status-line">SYSTÈME DOMOTIQUE · ACTIF</div>
+      <div class="status-line"><span class="status-led"></span>SYSTÈME DOMOTIQUE · ACTIF</div>
       <div id="clock">--:--:--</div>
     </div>
   </header>
@@ -231,7 +289,7 @@
   <div class="panels">
 
     <div class="panel">
-      <div class="panel-label">◈ Requête</div>
+      <div class="panel-label">◈ REQUÊTE <span class="bar"><span></span><span></span><span></span></span></div>
       <div class="panel-divider"></div>
       <div class="panel-content">
         <span id="question-text" class="loading">En attente d'une requête…</span>
@@ -239,7 +297,7 @@
     </div>
 
     <div class="panel">
-      <div class="panel-label">◈ Réponse</div>
+      <div class="panel-label">◈ RÉPONSE <span class="bar"><span></span><span></span><span></span></span></div>
       <div class="panel-divider"></div>
       <div class="panel-content">
         <span id="response-text" class="loading">Système prêt<span class="cursor"></span></span>
@@ -257,18 +315,13 @@
 </div>
 
 <script>
-  // ── CONFIG ──────────────────────────────────────────────
-  // Remplace par ton URL Nabu Casa (sans slash final)
-  // Exemple : "https://abcdef1234567890.ui.nabu.casa"
   const HA_URL = "https://by5fqhjrysqigiccsd5nogd6l0zykwfi.ui.nabu.casa";
   const HA_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0MDdiNDE3MTM2YWU0ZDJkOTdlYzA2YTE5NWI3NTY0YyIsImlhdCI6MTc4Mjg5ODY4MywiZXhwIjoyMDk4MjU4NjgzfQ.Rqmj8WjYFu-ip5iBTe2VuwXtCplhL4H92gnja8B25vA";
 
   const QUESTION_ENTITY = "input_text.jarvis_question";
   const RESPONSE_ENTITY  = "input_text.jarvis_reponse";
-  const REFRESH_MS = 2000; // rafraîchissement toutes les 2 secondes
-  // ────────────────────────────────────────────────────────
+  const REFRESH_MS = 2000;
 
-  // Horloge
   function updateClock() {
     const now = new Date();
     document.getElementById('clock').textContent =
@@ -277,7 +330,6 @@
   setInterval(updateClock, 1000);
   updateClock();
 
-  // Fetch entité HA
   async function fetchEntity(entityId) {
     const res = await fetch(`${HA_URL}/api/states/${entityId}`, {
       headers: { Authorization: `Bearer ${HA_TOKEN}` }
@@ -287,7 +339,6 @@
     return data.state || '';
   }
 
-  // Mise à jour de l'affichage
   async function refresh() {
     try {
       const [question, response] = await Promise.all([
