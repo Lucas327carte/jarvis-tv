@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>J.A.R.V.I.S</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cyan: #00e5ff;
+      --cyan-dim: rgba(0, 229, 255, 0.18);
+      --cyan-mid: rgba(0, 229, 255, 0.55);
+      --bg: #020b12;
+      --panel: rgba(0, 18, 30, 0.82);
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--bg);
+      color: #dffbff;
+      font-family: 'Rajdhani', sans-serif;
+      overflow: hidden;
+    }
+
+    /* Animated grid background */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(var(--cyan-dim) 1px, transparent 1px),
+        linear-gradient(90deg, var(--cyan-dim) 1px, transparent 1px);
+      background-size: 48px 48px;
+      animation: gridPulse 4s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Radial glow center */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background: radial-gradient(ellipse 70% 50% at 50% 50%, rgba(0,229,255,0.10), transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes gridPulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    .screen {
+      position: relative;
+      z-index: 1;
+      width: 100vw; height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      padding: 3vh 4vw;
+      gap: 2vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--cyan-mid);
+      padding-bottom: 1.5vh;
+    }
+
+    .logo {
+      font-family: 'Orbitron', monospace;
+      font-weight: 900;
+      font-size: clamp(2.4rem, 5vw, 4.2rem);
+      letter-spacing: 0.18em;
+      color: var(--cyan);
+      text-shadow: 0 0 24px rgba(0,229,255,0.8), 0 0 60px rgba(0,229,255,0.3);
+      animation: logoBlink 3s ease-in-out infinite;
+    }
+
+    @keyframes logoBlink {
+      0%, 100% { text-shadow: 0 0 24px rgba(0,229,255,0.8), 0 0 60px rgba(0,229,255,0.3); }
+      50%       { text-shadow: 0 0 40px rgba(0,229,255,1),   0 0 90px rgba(0,229,255,0.5); }
+    }
+
+    .header-right {
+      text-align: right;
+    }
+
+    .status-line {
+      font-size: clamp(0.75rem, 1.4vw, 1.1rem);
+      color: rgba(0,229,255,0.7);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    #clock {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(1.2rem, 2.5vw, 2rem);
+      color: var(--cyan);
+      letter-spacing: 0.1em;
+    }
+
+    /* ── MAIN PANELS ── */
+    .panels {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5vw;
+      align-items: stretch;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--cyan-mid);
+      box-shadow: 0 0 32px var(--cyan-dim), inset 0 0 20px rgba(0,229,255,0.04);
+      padding: 3vh 2.5vw;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Corner decorations */
+    .panel::before, .panel::after {
+      content: '';
+      position: absolute;
+      width: 16px; height: 16px;
+      border-color: var(--cyan);
+      border-style: solid;
+    }
+    .panel::before { top: 8px; left: 8px; border-width: 2px 0 0 2px; }
+    .panel::after  { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; }
+
+    .panel-label {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(0.7rem, 1.3vw, 1rem);
+      letter-spacing: 0.2em;
+      color: var(--cyan);
+      text-transform: uppercase;
+      opacity: 0.8;
+    }
+
+    .panel-divider {
+      height: 1px;
+      background: linear-gradient(90deg, var(--cyan-mid), transparent);
+    }
+
+    .panel-content {
+      font-size: clamp(1.1rem, 2.2vw, 1.8rem);
+      font-weight: 300;
+      line-height: 1.5;
+      color: #e8faff;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      min-height: 12vh;
+    }
+
+    #question-text { font-style: italic; opacity: 0.85; }
+
+    #response-text {
+      font-weight: 600;
+      color: #ffffff;
+      text-shadow: 0 0 12px rgba(0,229,255,0.4);
+    }
+
+    /* Typing cursor animation */
+    .cursor {
+      display: inline-block;
+      width: 2px; height: 1.1em;
+      background: var(--cyan);
+      margin-left: 4px;
+      vertical-align: middle;
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--cyan-mid);
+      padding-top: 1.5vh;
+      font-size: clamp(0.65rem, 1.2vw, 0.95rem);
+      color: rgba(0,229,255,0.55);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* Scan line overlay */
+    .scanlines {
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        rgba(0,0,0,0.08) 3px,
+        rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* Loading state */
+    .loading { opacity: 0.4; font-style: italic; }
+  </style>
+</head>
+<body>
+
+<div class="scanlines"></div>
+
+<div class="screen">
+
+  <header>
+    <div class="logo">J.A.R.V.I.S</div>
+    <div class="header-right">
+      <div class="status-line">SYSTÈME DOMOTIQUE · ACTIF</div>
+      <div id="clock">--:--:--</div>
+    </div>
+  </header>
+
+  <div class="panels">
+
+    <div class="panel">
+      <div class="panel-label">◈ Requête</div>
+      <div class="panel-divider"></div>
+      <div class="panel-content">
+        <span id="question-text" class="loading">En attente d'une requête…</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">◈ Réponse</div>
+      <div class="panel-divider"></div>
+      <div class="panel-content">
+        <span id="response-text" class="loading">Système prêt<span class="cursor"></span></span>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <span>HOME ASSISTANT · RÉSEAU LOCAL</span>
+    <span id="last-update">Dernière mise à jour : --</span>
+    <span>LUCAS.C · COURNONTERRAL</span>
+  </footer>
+
+</div>
+
+<script>
+  // ── CONFIG ──────────────────────────────────────────────
+  // Remplace par ton URL Nabu Casa (sans slash final)
+  // Exemple : "https://abcdef1234567890.ui.nabu.casa"
+  const HA_URL = "http://homeassistant.local:8123";
+  const HA_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0MDdiNDE3MTM2YWU0ZDJkOTdlYzA2YTE5NWI3NTY0YyIsImlhdCI6MTc4Mjg5ODY4MywiZXhwIjoyMDk4MjU4NjgzfQ.Rqmj8WjYFu-ip5iBTe2VuwXtCplhL4H92gnja8B25vA";
+
+  const QUESTION_ENTITY = "input_text.jarvis_question";
+  const RESPONSE_ENTITY  = "input_text.jarvis_reponse";
+  const REFRESH_MS = 2000; // rafraîchissement toutes les 2 secondes
+  // ────────────────────────────────────────────────────────
+
+  // Horloge
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('clock').textContent =
+      now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // Fetch entité HA
+  async function fetchEntity(entityId) {
+    const res = await fetch(`${HA_URL}/api/states/${entityId}`, {
+      headers: { Authorization: `Bearer ${HA_TOKEN}` }
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    return data.state || '';
+  }
+
+  // Mise à jour de l'affichage
+  async function refresh() {
+    try {
+      const [question, response] = await Promise.all([
+        fetchEntity(QUESTION_ENTITY),
+        fetchEntity(RESPONSE_ENTITY)
+      ]);
+
+      const qEl = document.getElementById('question-text');
+      const rEl = document.getElementById('response-text');
+
+      qEl.classList.remove('loading');
+      rEl.classList.remove('loading');
+
+      qEl.textContent = question || 'En attente d\'une requête…';
+      rEl.innerHTML   = (response || 'Système prêt') + '<span class="cursor"></span>';
+
+      const now = new Date();
+      document.getElementById('last-update').textContent =
+        'Dernière mise à jour : ' + now.toLocaleTimeString('fr-FR');
+
+    } catch (e) {
+      console.warn('Erreur HA:', e);
+    }
+  }
+
+  setInterval(refresh, REFRESH_MS);
+  refresh();
+</script>
+</body>
+</html>
